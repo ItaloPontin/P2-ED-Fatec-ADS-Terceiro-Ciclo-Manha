@@ -1,6 +1,6 @@
 ﻿**Vídeo Explicativo**: https://youtu.be/L_AKYPqbibU
  
-Link do Simulador Visual: italopontin.github.io/P2-ED-Fatec-ADS-Terceiro-Ciclo-Manha/trabalho-p2-ed/src/demo/
+Link do Simulador Visual: https://italopontin.github.io/P2-ED-Fatec-ADS-Terceiro-Ciclo-Manha/trabalho-p2-ed/src/demo/
 
 Aluno: Ítalo Pontin Delloiagono e Silva
 
