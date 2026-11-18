@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de Ordenação — Merge Sort e Quick Sort</title>
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--tx:#1f2328;--mut:#6b7280;--bd:#dcdad2;--bar:#6c8ebf;--cmp:#f2c230;--piv:#8e44ad;--wr:#e67e22;--ok:#2e9e5b;--ac:#2f5fd0;--acx:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171a;--card:#1e2126;--tx:#e8e9eb;--mut:#9aa1ab;--bd:#343941;--bar:#5b7fb3;--cmp:#e0b020;--piv:#b36bd6;--wr:#e8893a;--ok:#3fbf7a;--ac:#6d93f0;--acx:#10141c}}
+:root[data-theme="dark"]{--bg:#15171a;--card:#1e2126;--tx:#e8e9eb;--mut:#9aa1ab;--bd:#343941;--bar:#5b7fb3;--cmp:#e0b020;--piv:#b36bd6;--wr:#e8893a;--ok:#3fbf7a;--ac:#6d93f0;--acx:#10141c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+.w{max-width:900px;margin:0 auto;padding:20px 16px 32px}
+h1{font-size:1.4rem;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 16px;font-size:.92rem}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lbl{font-size:.78rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+button{font:inherit;font-size:.92rem;padding:8px 14px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
+button:hover{border-color:var(--ac)}
+button.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+button.pri{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+button:disabled{opacity:.45;cursor:default}
+#nums{display:flex;gap:3px;margin-top:4px;font-weight:700;line-height:1.2}
+#nums div{flex:1;min-width:3px;text-align:center;border-radius:5px;padding:3px 0;color:var(--tx);overflow:hidden}
+#nums.rot div{writing-mode:vertical-rl;transform:rotate(180deg);padding:4px 0}
+#nums .out{opacity:.45}#nums .ok{color:var(--ok)}
+#nums .cmp{background:var(--cmp);color:#1f2328}#nums .piv{background:var(--piv);color:#fff}#nums .wr{background:var(--wr);color:#fff}
+#viz{height:340px;display:flex;align-items:flex-end;gap:3px;padding:8px 0 0}
+.b{flex:1;background:var(--bar);border-radius:3px 3px 0 0;position:relative;min-width:3px;transition:height .12s,background .12s,opacity .12s}
+.b span{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-size:.7rem;color:var(--mut)}
+.b.out{opacity:.4}.b.cmp{background:var(--cmp)}.b.piv{background:var(--piv)}.b.wr{background:var(--wr)}.b.ok{background:var(--ok);opacity:1}
+#msg{min-height:2.6em;margin:10px 0 0;font-size:.95rem}
+.st{display:flex;gap:18px;flex-wrap:wrap;font-size:.88rem;color:var(--mut);margin-top:6px}
+.st b{color:var(--tx)}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--mut);margin-top:10px}
+.lg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+input[type=range]{vertical-align:middle;accent-color:var(--ac)}
+#info{font-size:.9rem;color:var(--mut);margin:0}
+#custom{flex:1;min-width:200px;font:inherit;font-size:.92rem;padding:8px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+#custom:focus{outline:2px solid var(--ac);outline-offset:0}
+#err{color:#d64545;font-size:.85rem;margin:6px 0 0;min-height:1.2em}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>Simulador de Ordenação</h1>
+<p class="sub">Escolha o algoritmo, um caso pré-configurado e acompanhe a execução passo a passo.</p>
+
+<div class="card">
+  <div class="lbl">Algoritmo</div>
+  <div class="row" id="algs">
+    <button data-a="merge" class="on">Merge Sort</button>
+    <button data-a="quick">Quick Sort</button>
+  </div>
+  <div class="lbl" style="margin-top:14px">Casos pré-configurados</div>
+  <div class="row" id="cases">
+    <button data-c="best">Melhor Caso</button>
+    <button data-c="avg" class="on">Caso Médio</button>
+    <button data-c="worst">Pior Caso</button>
+  </div>
+  <div class="lbl" style="margin-top:14px">Array personalizado</div>
+  <div class="row">
+    <input type="text" id="custom" placeholder="Ex.: 5, 3, 8, 1, 9, 2, 7" aria-label="Digite os números do array">
+    <button class="pri" id="apply">Aplicar array</button>
+  </div>
+  <p id="err"></p>
+  <p id="info" style="margin-top:4px"></p>
+</div>
+
+<div class="card">
+  <div id="viz" aria-label="Visualização do array"></div>
+  <div id="nums"></div>
+  <p id="msg"></p>
+  <div class="st">
+    <span>Passo: <b id="sStep">0</b>/<b id="sTot">0</b></span>
+    <span>Comparações: <b id="sCmp">0</b></span>
+    <span>Trocas/Escritas: <b id="sWr">0</b></span>
+  </div>
+  <div class="lg">
+    <span><i style="background:var(--bar)"></i>Elemento</span>
+    <span><i style="background:var(--cmp)"></i>Comparando</span>
+    <span><i style="background:var(--piv)"></i>Pivô</span>
+    <span><i style="background:var(--wr)"></i>Troca / escrita</span>
+    <span><i style="background:var(--ok)"></i>Posição final</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="row">
+    <button class="pri" id="play">▶ Executar</button>
+    <button id="pause">⏸ Pausar</button>
+    <button id="step">⏭ Próximo passo</button>
+    <button id="restart">↺ Reiniciar</button>
+  </div>
+  <div class="row" style="margin-top:12px;gap:18px">
+    <label>Velocidade <input type="range" id="spd" min="1" max="10" value="6"></label>
+    <label>Tamanho <input type="range" id="size" min="8" max="40" value="16"> <span id="sizeV">16</span></label>
+  </div>
+</div>
+</div>
+
+<script>
+let alg='merge',cs='avg',N=16,base=[],frames=[],idx=0,timer=null,customArr=[],mn=1,mx=16;
+const $=id=>document.getElementById(id);
+const INFO={
+ merge:{best:'Melhor caso (array já ordenado): menos comparações; complexidade O(n log n).',avg:'Caso médio (array aleatório): O(n log n).',worst:'Pior caso (arranjo que maximiza as comparações nos merges): O(n log n), com o maior número de comparações possível.'},
+ quick:{best:'Melhor caso (pivô sempre na mediana): partições equilibradas, O(n log n).',avg:'Caso médio (array aleatório): O(n log n) esperado.',worst:'Pior caso (array já ordenado, pivô = último elemento): partições totalmente desbalanceadas, O(n²).'}
+};
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function msWorst(v){if(v.length<=1)return v;const l=[],r=[];v.forEach((x,i)=>(i%2?r:l).push(x));return msWorst(l).concat(msWorst(r))}
+function qsBest(v){
+  if(v.length<=1)return v.slice();
+  const m=Math.floor((v.length-1)/2),p=v[m],L=qsBest(v.slice(0,m)),R=qsBest(v.slice(m+1));
+  if(!R.length)return L.concat([p]);
+  return L.concat([R[R.length-1]],R.slice(0,-1),[p]);
+}
+function makeArray(){
+  if(cs==='custom')return customArr.slice();
+  const s=Array.from({length:N},(_,i)=>i+1);
+  if(cs==='avg')return shuffle(s);
+  if(cs==='best')return alg==='quick'?qsBest(s):s;
+  return alg==='quick'?s:msWorst(s);
+}
+
+function genFrames(input){
+  const a=input.slice(),F=[],ok=new Set();let c=0,w=0;
+  const snap=(msg,o={})=>F.push({a:a.slice(),msg,cmp:o.cmp||[],wr:o.wr||[],piv:o.piv??-1,rng:o.rng||null,ok:[...ok],c,w});
+  snap('Array inicial. Pressione Executar ou Próximo passo.');
+  if(alg==='quick'){
+    const qs=(lo,hi)=>{
+      if(lo>hi)return;
+      if(lo===hi){ok.add(lo);snap(`Subarray de 1 elemento: posição ${lo} já está final.`,{rng:[lo,hi]});return}
+      const p=a[hi];let i=lo-1;
+      snap(`Partição [${lo}..${hi}]: pivô = ${p} (último elemento).`,{piv:hi,rng:[lo,hi]});
+      for(let j=lo;j<hi;j++){
+        c++;snap(`Comparar ${a[j]} com o pivô ${p}.`,{cmp:[j],piv:hi,rng:[lo,hi]});
+        if(a[j]<p){i++;if(i!==j){[a[i],a[j]]=[a[j],a[i]];w++;snap(`${a[i]} < ${p}: troca posições ${i} e ${j}.`,{wr:[i,j],piv:hi,rng:[lo,hi]})}
+          else snap(`${a[j]} < ${p}: já está na posição correta da partição.`,{piv:hi,cmp:[j],rng:[lo,hi]})}
+      }
+      if(i+1!==hi){[a[i+1],a[hi]]=[a[hi],a[i+1]];w++}
+      ok.add(i+1);
+      snap(`Pivô ${p} colocado na posição final ${i+1}.`,{wr:[i+1],rng:[lo,hi]});
+      qs(lo,i);qs(i+2,hi);
+    };
+    qs(0,a.length-1);
+  }else{
+    const n=a.length;
+    const ms=(lo,hi)=>{
+      if(lo>=hi)return;
+      const mid=(lo+hi)>>1;
+      snap(`Dividir [${lo}..${hi}] em [${lo}..${mid}] e [${mid+1}..${hi}].`,{rng:[lo,hi]});
+      ms(lo,mid);ms(mid+1,hi);
+      const L=a.slice(lo,mid+1),R=a.slice(mid+1,hi+1);let i=0,j=0,k=lo;
+      const fin=lo===0&&hi===n-1;
+      const put=(v,why)=>{a[k]=v;w++;if(fin)ok.add(k);snap(why,{wr:[k],rng:[lo,hi]});k++};
+      while(i<L.length&&j<R.length){
+        c++;snap(`Intercalar [${lo}..${hi}]: comparar ${L[i]} (esq.) com ${R[j]} (dir.).`,{cmp:[k],rng:[lo,hi]});
+        if(L[i]<=R[j])put(L[i++],`Menor é ${a[k]??L[i-1]}: escreve na posição ${k}.`);
+        else put(R[j++],`Menor é ${R[j-1]}: escreve na posição ${k}.`);
+      }
+      while(i<L.length)put(L[i++],`Sobrou da esquerda: copia ${L[i-1]} para ${k}.`);
+      while(j<R.length)put(R[j++],`Sobrou da direita: copia ${R[j-1]} para ${k}.`);
+    };
+    ms(0,n-1);
+  }
+  for(let i=0;i<a.length;i++)ok.add(i);
+  snap('Ordenação concluída!');
+  return F;
+}
+
+function render(){
+  const f=frames[idx],v=$('viz');
+  const nm=$('nums');
+  if(v.children.length!==f.a.length){v.innerHTML='';nm.innerHTML='';f.a.forEach(()=>{const d=document.createElement('div');d.className='b';v.appendChild(d);nm.appendChild(document.createElement('div'))});
+    const w=v.clientWidth/f.a.length;nm.className=w<26?'rot':'';nm.style.fontSize=Math.max(12,Math.min(22,w*0.55))+'px'}
+  const okS=new Set(f.ok);
+  [...v.children].forEach((d,i)=>{
+    d.style.height=(mx===mn?60:10+(f.a[i]-mn)/(mx-mn)*90)+'%';
+    let c='b';
+    if(okS.has(i))c+=' ok';
+    else if(f.piv===i)c+=' piv';
+    else if(f.wr.includes(i))c+=' wr';
+    else if(f.cmp.includes(i))c+=' cmp';
+    else if(f.rng&&(i<f.rng[0]||i>f.rng[1]))c+=' out';
+    if(f.wr.includes(i)&&!okS.has(i))c='b wr';
+    if(f.cmp.includes(i)&&!okS.has(i)&&f.piv!==i)c='b cmp';
+    d.className=c;
+    nm.children[i].textContent=f.a[i];nm.children[i].className=c.slice(1).trim();
+  });
+  $('msg').textContent=f.msg;
+  $('sStep').textContent=idx;$('sTot').textContent=frames.length-1;
+  $('sCmp').textContent=f.c;$('sWr').textContent=f.w;
+  const end=idx>=frames.length-1;
+  $('step').disabled=end;
+  $('play').disabled=end||!!timer;
+  $('pause').disabled=!timer;
+}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function delay(){return 1000/Math.pow(1.6,+$('spd').value-1)+30}
+function tick(){
+  if(idx>=frames.length-1){stop();render();return}
+  idx++;render();
+  timer=setTimeout(tick,delay());
+}
+function load(newArr){
+  stop();
+  if(newArr){base=makeArray();mn=Math.min(...base);mx=Math.max(...base)}
+  frames=genFrames(base);idx=0;
+  $('info').textContent=INFO[alg][cs]||'Array personalizado definido por você: o tempo depende da ordem dos valores informados.';
+  $('viz').innerHTML='';render();
+}
+$('play').onclick=()=>{if(timer||idx>=frames.length-1)return;timer=setTimeout(tick,50);render()};
+$('pause').onclick=()=>{stop();render()};
+$('step').onclick=()=>{stop();if(idx<frames.length-1){idx++}render()};
+$('restart').onclick=()=>{stop();idx=0;render()};
+$('algs').onclick=e=>{const b=e.target.closest('button');if(!b)return;alg=b.dataset.a;[...$('algs').children].forEach(x=>x.classList.toggle('on',x===b));load(true)};
+$('cases').onclick=e=>{const b=e.target.closest('button');if(!b)return;cs=b.dataset.c;N=+$('size').value;$('err').textContent='';[...$('cases').children].forEach(x=>x.classList.toggle('on',x===b));load(true)};
+$('size').oninput=e=>{N=+e.target.value;if(cs==='custom'){cs='avg';[...$('cases').children].forEach(x=>x.classList.toggle('on',x.dataset.c==='avg'))}$('sizeV').textContent=N;load(true)};
+function applyCustom(){
+  const parts=$('custom').value.trim().split(/[\s,;]+/).filter(Boolean),nums=parts.map(Number),err=$('err');
+  if(parts.length<2||parts.length>40||nums.some(x=>!Number.isFinite(x)||Math.abs(x)>9999)){err.textContent='Informe de 2 a 40 números (entre -9999 e 9999), separados por vírgula ou espaço.';return}
+  err.textContent='';customArr=nums;cs='custom';N=nums.length;
+  $('size').value=Math.min(40,Math.max(8,N));$('sizeV').textContent=N;
+  [...$('cases').children].forEach(x=>x.classList.remove('on'));
+  load(true);
+}
+$('apply').onclick=applyCustom;
+window.addEventListener('resize',()=>{$('viz').innerHTML='';render()});
+$('custom').addEventListener('keydown',e=>{if(e.key==='Enter')applyCustom()});
+load(true);
+</script>
+</body>
+</html>
