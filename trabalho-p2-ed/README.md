@@ -8,7 +8,7 @@ Curso: Terceiro ADS Manhã
 
 RA: 2840482521027
 
-*Tema Escolhio: Quick Sort Vs. Merge Sort*
+*Tema Escolhido: Quick Sort Vs. Merge Sort*
 
 **Resumo Teórico do Merge Sort:**
 -
